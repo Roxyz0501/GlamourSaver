@@ -5,7 +5,7 @@
   "Description": "Adds a SendDiscord button beside the Examine window. Only when pressed, it posts a cropped image, target character name, appearance item names, and Eorzea Database search links to the configured Discord Webhook. The UI supports English and Japanese.",
   "InternalName": "GlamourSaver",
   "AssemblyVersion": "0.5.0.0",
-  "RepoUrl": "__INJECT_PLUGIN_SOURCE_REPOSITORY_URL__",
+  "RepoUrl": "https://github.com/Roxyz0501/GlamourSaver",
   "ApplicableVersion": "any",
   "DalamudApiLevel": 15,
   "Tags": [
@@ -17,7 +17,7 @@
   ],
   "IsHide": false,
   "IsTestingExclusive": false,
-  "DownloadLinkInstall": "__INJECT_VERSIONED_RELEASE_ZIP_URL__",
-  "DownloadLinkUpdate": "__INJECT_VERSIONED_RELEASE_ZIP_URL__",
-  "LastUpdate": "__INJECT_UNIX_TIMESTAMP__"
+  "DownloadLinkInstall": "https://github.com/Roxyz0501/GlamourSaver/releases/download/v0.5.0.0/GlamourSaver-0.5.0.0.zip",
+  "DownloadLinkUpdate": "https://github.com/Roxyz0501/GlamourSaver/releases/download/v0.5.0.0/GlamourSaver-0.5.0.0.zip",
+  "LastUpdate": 1787161500
 }

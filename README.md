@@ -28,9 +28,9 @@ Author: `Roxyz0501`
 
 ### Shared custom repository
 
-After publication, add the shared Roxyz0501 custom repository URL under Dalamud's Experimental settings, then install `Glamour Saver` from the plugin installer.
+Add the shared Roxyz0501 custom repository URL below under Dalamud's Experimental settings, then install `Glamour Saver` from the plugin installer.
 
-> The shared repository URL has not been assigned yet. Replace this notice with the real URL before publication.
+`https://raw.githubusercontent.com/Roxyz0501/DalamudPluginRepo/main/repo.json`
 
 ### Local development build
 

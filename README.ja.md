@@ -28,9 +28,9 @@
 
 ### 共通カスタムリポジトリ
 
-公開後、Dalamud設定の「試験的機能」からRoxyz0501の共通カスタムリポジトリURLを追加し、プラグインインストーラーで `Glamour Saver` を選択します。
+Dalamud設定の「試験的機能」から下記のRoxyz0501共通カスタムリポジトリURLを追加し、プラグインインストーラーで `Glamour Saver` を選択します。
 
-> 共通カスタムリポジトリURLは未確定です。公開前に実URLへ置き換えます。
+`https://raw.githubusercontent.com/Roxyz0501/DalamudPluginRepo/main/repo.json`
 
 ### 開発版をローカル導入
 
