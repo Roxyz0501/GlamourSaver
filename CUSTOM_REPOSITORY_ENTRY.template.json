@@ -1,0 +1,23 @@
+{
+  "Author": "Roxyz0501",
+  "Name": "Glamour Saver",
+  "Punchline": "Save an examined character's glamour to Discord with one explicit click.",
+  "Description": "Adds a SendDiscord button beside the Examine window. Only when pressed, it posts a cropped image, target character name, appearance item names, and Eorzea Database search links to the configured Discord Webhook. The UI supports English and Japanese.",
+  "InternalName": "GlamourSaver",
+  "AssemblyVersion": "0.5.0.0",
+  "RepoUrl": "__INJECT_PLUGIN_SOURCE_REPOSITORY_URL__",
+  "ApplicableVersion": "any",
+  "DalamudApiLevel": 15,
+  "Tags": [
+    "glamour",
+    "discord",
+    "screenshot",
+    "ミラプリ",
+    "コーディネート"
+  ],
+  "IsHide": false,
+  "IsTestingExclusive": false,
+  "DownloadLinkInstall": "__INJECT_VERSIONED_RELEASE_ZIP_URL__",
+  "DownloadLinkUpdate": "__INJECT_VERSIONED_RELEASE_ZIP_URL__",
+  "LastUpdate": "__INJECT_UNIX_TIMESTAMP__"
+}

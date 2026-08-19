@@ -1,0 +1,52 @@
+<Project Sdk="Dalamud.NET.Sdk/15.0.0">
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <LangVersion>preview</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Platforms>x64</Platforms>
+    <PlatformTarget>x64</PlatformTarget>
+    <AssemblyName>GlamourSaver</AssemblyName>
+    <RootNamespace>GlamourSaver</RootNamespace>
+    <Authors>Roxyz0501</Authors>
+    <Version>0.5.0.0</Version>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Deterministic>true</Deterministic>
+    <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <RestoreLockedMode Condition="'$(Configuration)' == 'Release'">true</RestoreLockedMode>
+    <IsPackable>false</IsPackable>
+    <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <DalamudLibPath Condition="$([MSBuild]::IsOSPlatform('Windows'))">$(appdata)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="Dalamud" HintPath="$(DalamudLibPath)Dalamud.dll" Private="False" />
+    <Reference Include="Dalamud.Bindings.ImGui" HintPath="$(DalamudLibPath)Dalamud.Bindings.ImGui.dll" Private="False" />
+    <Reference Include="Lumina" HintPath="$(DalamudLibPath)Lumina.dll" Private="False" />
+    <Reference Include="Lumina.Excel" HintPath="$(DalamudLibPath)Lumina.Excel.dll" Private="False" />
+    <Reference Include="FFXIVClientStructs" HintPath="$(DalamudLibPath)FFXIVClientStructs.dll" Private="False" />
+    <Reference Include="InteropGenerator.Runtime" HintPath="$(DalamudLibPath)InteropGenerator.Runtime.dll" Private="False" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.12" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="images\icon.png" Link="icon.png" TargetPath="icon.png" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\LICENSE" Link="LICENSE" TargetPath="LICENSE" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\README.md" Link="README.md" TargetPath="README.md" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\README.ja.md" Link="README.ja.md" TargetPath="README.ja.md" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\THIRD_PARTY_NOTICES.md" Link="THIRD_PARTY_NOTICES.md" TargetPath="THIRD_PARTY_NOTICES.md" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\licenses\SixLabors.ImageSharp-LICENSE.txt" Link="licenses\SixLabors.ImageSharp-LICENSE.txt" TargetPath="licenses\SixLabors.ImageSharp-LICENSE.txt" CopyToOutputDirectory="PreserveNewest" />
+    <EmbeddedResource Include="images\icon.png" LogicalName="GlamourSaver.icon.png" />
+  </ItemGroup>
+
+  <Target Name="CreateVersionedReleaseZip"
+          AfterTargets="DefaultDalamudPackagerRelease"
+          Condition="'$(Configuration)' == 'Release'">
+    <Copy SourceFiles="$(OutputPath)$(AssemblyName)\latest.zip"
+          DestinationFiles="$(OutputPath)$(AssemblyName)\$(AssemblyName)-$(Version).zip" />
+  </Target>
+</Project>

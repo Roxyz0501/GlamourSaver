@@ -1,0 +1,20 @@
+# Build outputs
+**/bin/
+**/obj/
+
+# IDE and local tooling
+.vs/
+.idea/
+.vscode/
+*.user
+*.suo
+
+# Dalamud/local secrets and runtime configuration
+*.config.json
+GlamourSaver.json.bak
+webhook*.txt
+*.log
+
+# OS files
+Thumbs.db
+.DS_Store
