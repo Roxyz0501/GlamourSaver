@@ -10,7 +10,9 @@
     <AssemblyName>GlamourSaver</AssemblyName>
     <RootNamespace>GlamourSaver</RootNamespace>
     <Authors>Roxyz0501</Authors>
-    <Version>0.5.0.0</Version>
+    <Version>0.5.1.0</Version>
+    <RepoUrl>https://github.com/Roxyz0501/GlamourSaver</RepoUrl>
+    <IconUrl>https://raw.githubusercontent.com/Roxyz0501/GlamourSaver/main/GlamourSaver/images/icon.png</IconUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Deterministic>true</Deterministic>
     <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>

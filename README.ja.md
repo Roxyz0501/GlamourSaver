@@ -118,7 +118,7 @@ dotnet restore .\GlamourSaver\GlamourSaver.csproj --locked-mode
 dotnet build .\GlamourSaver\GlamourSaver.csproj -c Release --no-restore
 ```
 
-SDKは `global.json`、NuGet依存は `packages.lock.json` で固定しています。公開用ZIPは `GlamourSaver/bin/Release/GlamourSaver/GlamourSaver-0.5.0.0.zip` に生成されます。
+SDKは `global.json`、NuGet依存は `packages.lock.json` で固定しています。公開用ZIPは `GlamourSaver/bin/Release/GlamourSaver/GlamourSaver-0.5.1.0.zip` に生成されます。
 
 ## 任意支援
 
