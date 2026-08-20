@@ -26,7 +26,7 @@
 
 ## 検証済みRelease成果物
 
-- ファイル名: `GlamourSaver-0.5.0.0.zip`
+- ファイル名: `GlamourSaver-0.5.1.0.zip`
 - SHA-256: `8E8E79917D1F08814335A14E88924844DEAC86B14B84C2A409C6773A156A2F12`
 - ZIPエントリ数: 10
 - `latest.zip` と版番号付きZIPのSHA-256一致を確認
@@ -53,13 +53,13 @@
 - [ ] 個別リポジトリでGit履歴全体のsecret scanを実行する
 - [ ] Roxyz0501がソース、AI生成物、ライセンスを最終承認する
 - [ ] 実機テスト結果と既知の不具合をREADME/Release notesへ反映する
-- [ ] `GlamourSaver-0.5.0.0.zip` をGitHub Releaseへ添付する
+- [ ] `GlamourSaver-0.5.1.0.zip` をGitHub Releaseへ添付する
 - [ ] git init、GitHubリポジトリ作成、push、Release公開は、別途明示承認を受けてから行う
 
 ## 共通カスタムリポジトリ統合時のTODO
 
 - [ ] `CUSTOM_REPOSITORY_ENTRY.template.json` の `RepoUrl` に個別ソースリポジトリURLを注入する
-- [ ] `DownloadLinkInstall` と `DownloadLinkUpdate` に個別GitHub Releaseの `GlamourSaver-0.5.0.0.zip` URLを注入する
+- [ ] `DownloadLinkInstall` と `DownloadLinkUpdate` に個別GitHub Releaseの `GlamourSaver-0.5.1.0.zip` URLを注入する
 - [ ] `LastUpdate` に公開時のUNIX時刻を注入する
 - [ ] 共通repo.jsonの配列へ1エントリとして統合する
 - [ ] `AssemblyVersion` とZIP内manifest/DLLのバージョンが一致することを検証する
