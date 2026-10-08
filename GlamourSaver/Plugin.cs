@@ -27,9 +27,8 @@ public sealed class Plugin : IDalamudPlugin
 
         var configuration = pluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
         var configurationChanged = configuration.Migrate();
-        if (!LocalizationService.ResolutionRulesAreValid)
-            throw new InvalidOperationException("Localization resolution rules failed validation.");
-        var initialLanguage = LocalizationService.ResolveInitial(configuration.DisplayLanguage, clientState.ClientLanguage);
+        LocalizationService.ValidateOrThrow();
+        var initialLanguage = LocalizationService.ResolveInitial(configuration.DisplayLanguage, clientState.ClientLanguage, pluginInterface.UiLanguage);
         if (configuration.DisplayLanguage != initialLanguage)
         {
             configuration.DisplayLanguage = initialLanguage;

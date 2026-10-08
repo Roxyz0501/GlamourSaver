@@ -144,7 +144,7 @@ public sealed class PluginUi : IDisposable
         if (!settingsOpen)
             return;
 
-        ImGui.SetNextWindowSize(new Vector2(680, 520), ImGuiCond.FirstUseEver);
+        ImGui.SetNextWindowSize(new Vector2(780, 620), ImGuiCond.FirstUseEver);
         if (!ImGui.Begin(T(
                 "Glamour Saver Settings###GlamourSaverSettings",
                 "Glamour Saver 設定###GlamourSaverSettings"), ref settingsOpen))
@@ -180,13 +180,11 @@ public sealed class PluginUi : IDisposable
 
     private unsafe void DrawGeneralSettings()
     {
-        var selectedLanguage = configuration.DisplayLanguage == DisplayLanguage.Japanese ? 1 : 0;
-        ImGui.SetNextItemWidth(180);
-        if (ImGui.Combo(T("Display language", "表示言語"), ref selectedLanguage, "English\0日本語\0"))
+        var selectedLanguage = Array.IndexOf(LocalizationService.SelectionOrder, localization.ResolvedLanguage);
+        ImGui.SetNextItemWidth(220);
+        if (ImGui.Combo(T("Display language", "表示言語"), ref selectedLanguage, string.Join('\0', LocalizationService.LanguageNames) + "\0"))
         {
-            configuration.DisplayLanguage = selectedLanguage == 1
-                ? DisplayLanguage.Japanese
-                : DisplayLanguage.English;
+            configuration.DisplayLanguage = LocalizationService.SelectionOrder[selectedLanguage];
             status = string.Empty;
             supportStatus = string.Empty;
             save();
@@ -196,7 +194,7 @@ public sealed class PluginUi : IDisposable
             "初回のみゲームクライアント言語から選択し、その後はここで選んだ言語を維持します。"));
         ImGui.Separator();
 
-        ImGui.TextUnformatted("Discord Webhook URL");
+        ImGui.TextUnformatted(T("Discord Webhook URL", "Discord Webhook URL"));
         var webhook = configuration.DiscordWebhookUrl;
         ImGui.SetNextItemWidth(-1);
         if (ImGui.InputText("##GlamourSaverWebhook", ref webhook, 2048, ImGuiInputTextFlags.Password))
@@ -376,9 +374,7 @@ public sealed class PluginUi : IDisposable
         }
         catch
         {
-            supportStatus = T(
-                $"The browser could not be opened. Open this URL manually: {SupportUrl}",
-                $"ブラウザを開けませんでした。URLを直接開いてください: {SupportUrl}");
+            supportStatus = localization.Format("The browser could not be opened. Open this URL manually: {0}", SupportUrl);
         }
     }
 
@@ -421,9 +417,7 @@ public sealed class PluginUi : IDisposable
         try
         {
             await discord.SendAsync(snapshot, png, cancellationToken).ConfigureAwait(false);
-            status = T(
-                $"Posted {snapshot.CharacterName}'s glamour.",
-                $"{snapshot.CharacterName} のコーディネートを投稿しました。");
+            status = localization.Format("Posted {0}'s glamour.", snapshot.CharacterName);
             chat.Print($"[Glamour Saver] {status}");
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
@@ -436,7 +430,7 @@ public sealed class PluginUi : IDisposable
         }
         catch (Exception ex)
         {
-            status = T("Post failed: ", "投稿失敗: ") + ex.Message;
+            status = localization.Format("Post failed: {0}", ex.Message);
             chat.PrintError($"[Glamour Saver] {status}");
             log.Error(ex, "Discordへの投稿に失敗しました");
         }
@@ -462,7 +456,7 @@ public sealed class PluginUi : IDisposable
         }
         catch (Exception ex)
         {
-            status = T("Connection test failed: ", "接続テスト失敗: ") + ex.Message;
+            status = localization.Format("Connection test failed: {0}", ex.Message);
             log.Warning(ex, "Discord Webhook接続テストに失敗しました");
         }
     }
@@ -485,7 +479,7 @@ public sealed class PluginUi : IDisposable
         }
         catch (Exception ex)
         {
-            status = T("Failed to apply icon: ", "アイコン適用失敗: ") + ex.Message;
+            status = localization.Format("Failed to apply icon: {0}", ex.Message);
             log.Warning(ex, "Discord Webhookアイコンの適用に失敗しました");
         }
     }
@@ -515,9 +509,7 @@ public sealed class PluginUi : IDisposable
 
     private unsafe string GetInspectDetectionText()
         => TryGetInspectAddon(out _, out var bounds)
-            ? T(
-                $"Window detected: CharacterInspect ({bounds.Width}x{bounds.Height}) / {reader.StateDescription}",
-                $"画面検出: CharacterInspect ({bounds.Width}x{bounds.Height}) / {reader.StateDescription}")
+            ? localization.Format("Window detected: CharacterInspect ({0}x{1}) / {2}", bounds.Width, bounds.Height, reader.StateDescription)
             : T(
                 "Window detection: CharacterInspect is not currently visible.",
                 "画面検出: CharacterInspectは現在表示されていません。");

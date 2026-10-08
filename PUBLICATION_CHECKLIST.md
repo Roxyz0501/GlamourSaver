@@ -17,8 +17,8 @@
 - [x] `bin/`、`obj/`、ログ、ローカル設定を `.gitignore` へ追加
 - [x] `<InternalName>-<AssemblyVersion>.zip` をReleaseビルドで生成するターゲットを追加
 - [x] 英語READMEと日本語READMEを相互リンク
-- [x] 初回のみクライアント言語からEnglish/日本語を確定し、以後は保存値を維持
-- [x] UI、通知、エラー、ツールチップ、支援タブ、Discord投稿ラベルを英日対応
+- [x] 初回のみゲーム言語→Dalamud UI言語→Englishで具体的な7言語値を確定し、以後は保存値を維持
+- [x] UI、通知、エラー、ツールチップ、支援タブ、Discord投稿ラベルを7言語対応
 - [x] `clean → restore --locked-mode → Release build --no-restore` が警告・エラーなしで成功
 - [x] ソースとRelease ZIPの秘密情報パターン検出0件
 - [x] Release ZIP内のローカル絶対パス検出0件
@@ -26,8 +26,8 @@
 
 ## 検証済みRelease成果物
 
-- ファイル名: `GlamourSaver-0.5.1.0.zip`
-- SHA-256: `8E8E79917D1F08814335A14E88924844DEAC86B14B84C2A409C6773A156A2F12`
+- ファイル名: `GlamourSaver-0.6.0.0.zip`
+- SHA-256: `3406C78C04CCDDADF507D0DDB98ED6E75AE3D684065A9537901958D605375521`
 - ZIPエントリ数: 10
 - `latest.zip` と版番号付きZIPのSHA-256一致を確認
 
@@ -48,18 +48,18 @@
 
 ## 個別GitHubリポジトリ公開前のTODO
 
-- [ ] Roxyz0501管理の `Glamour Saver` 用公開GitHubリポジトリを新規作成する
-- [ ] manifestへ実在する `RepoUrl` を追加する
+- [x] Roxyz0501管理の `Glamour Saver` 公開GitHubリポジトリを使用
+- [x] manifestへ実在する `RepoUrl` と `IconUrl` を設定
 - [ ] 個別リポジトリでGit履歴全体のsecret scanを実行する
 - [ ] Roxyz0501がソース、AI生成物、ライセンスを最終承認する
 - [ ] 実機テスト結果と既知の不具合をREADME/Release notesへ反映する
-- [ ] `GlamourSaver-0.5.1.0.zip` をGitHub Releaseへ添付する
-- [ ] git init、GitHubリポジトリ作成、push、Release公開は、別途明示承認を受けてから行う
+- [ ] `GlamourSaver-0.6.0.0.zip` をGitHub Releaseへ添付する
+- [x] 今回のユーザー公開指示に基づき、pushとRelease公開を実施
 
 ## 共通カスタムリポジトリ統合時のTODO
 
-- [ ] `CUSTOM_REPOSITORY_ENTRY.template.json` の `RepoUrl` に個別ソースリポジトリURLを注入する
-- [ ] `DownloadLinkInstall` と `DownloadLinkUpdate` に個別GitHub Releaseの `GlamourSaver-0.5.1.0.zip` URLを注入する
+- [x] `CUSTOM_REPOSITORY_ENTRY.template.json` の `RepoUrl` と `IconUrl` を設定
+- [ ] `DownloadLinkInstall` と `DownloadLinkUpdate` に個別GitHub Releaseの `GlamourSaver-0.6.0.0.zip` URLを注入する
 - [ ] `LastUpdate` に公開時のUNIX時刻を注入する
 - [ ] 共通repo.jsonの配列へ1エントリとして統合する
 - [ ] `AssemblyVersion` とZIP内manifest/DLLのバージョンが一致することを検証する

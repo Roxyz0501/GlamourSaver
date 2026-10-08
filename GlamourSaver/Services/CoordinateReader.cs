@@ -17,14 +17,6 @@ public sealed unsafe class CoordinateReader(
         "Earrings", "Necklace", "Bracelets", "Right Ring", "Left Ring", "Soul Crystal",
     ];
 
-    private static readonly string[] JapaneseSlotNames =
-    [
-        "主道具", "副道具", "頭", "胴", "手", "脚", "足",
-        "耳飾り", "首飾り", "腕輪", "指輪（右）", "指輪（左）", "ジョブクリスタル",
-    ];
-
-    private string[] SlotNames => localization.IsJapanese ? JapaneseSlotNames : EnglishSlotNames;
-
     public bool IsReady
     {
         get
@@ -45,7 +37,7 @@ public sealed unsafe class CoordinateReader(
             var agent = GetAgent();
             if (agent == null)
                 return false;
-            for (var i = 0; i < SlotNames.Length; i++)
+            for (var i = 0; i < EnglishSlotNames.Length; i++)
             {
                 if (agent->GlamourItems[i].ItemId != 0)
                     return true;
@@ -63,16 +55,14 @@ public sealed unsafe class CoordinateReader(
                 return localization.Text("Inspect agent was not found.", "Inspect Agentが見つかりません");
             var itemCount = CountAvailableItems(agent);
             if (itemCount > 0)
-                return localization.Text(
-                    $"Equipment data ready ({itemCount} slots)",
-                    $"装備データ取得済み（{itemCount}枠）");
+                return localization.Format("Equipment data ready ({0} slots)", itemCount);
             return agent->FetchCharacterDataStatus switch
             {
                 0 => localization.Text("Waiting for character data", "キャラクターデータ待機中"),
                 1 => localization.Text("Loading character data", "キャラクターデータ取得中"),
                 2 => localization.Text("Equipment data ready", "装備データ取得済み"),
                 3 => localization.Text("Failed to load character data", "キャラクターデータ取得失敗"),
-                var value => localization.Text($"Character data status: {value}", $"キャラクターデータ状態: {value}"),
+                var value => localization.Format("Character data status: {0}", value),
             };
         }
     }
@@ -90,13 +80,11 @@ public sealed unsafe class CoordinateReader(
 
             var name = uiState->Inspect.NameString.Trim();
             if (name.Length == 0)
-                name = localization.Text(
-                    $"Character {agent->CurrentEntityId:X8}",
-                    $"キャラクター {agent->CurrentEntityId:X8}");
+                name = localization.Format("Character {0:X8}", agent->CurrentEntityId);
 
             var itemSheet = dataManager.GetExcelSheet<Item>();
-            var result = new List<CoordinateItem>(SlotNames.Length);
-            for (var i = 0; i < SlotNames.Length; i++)
+            var result = new List<CoordinateItem>(EnglishSlotNames.Length);
+            for (var i = 0; i < EnglishSlotNames.Length; i++)
             {
                 var equipped = agent->Items[i];
                 var coordinate = agent->GlamourItems[i];
@@ -113,7 +101,7 @@ public sealed unsafe class CoordinateReader(
                 if (string.IsNullOrWhiteSpace(itemName))
                     continue;
 
-                result.Add(new CoordinateItem(i, SlotNames[i], itemId, itemName, BuildDatabaseUrl(itemName)));
+                result.Add(new CoordinateItem(i, localization.Text(EnglishSlotNames[i]), itemId, itemName, BuildDatabaseUrl(itemName)));
             }
 
             return new CoordinateSnapshot(name, result);
@@ -148,7 +136,13 @@ public sealed unsafe class CoordinateReader(
 
     private string BuildDatabaseUrl(string itemName)
     {
-        var host = localization.IsJapanese ? "jp.finalfantasyxiv.com" : "na.finalfantasyxiv.com";
+        var host = localization.ResolvedLanguage switch
+        {
+            DisplayLanguage.Japanese => "jp.finalfantasyxiv.com",
+            DisplayLanguage.German => "de.finalfantasyxiv.com",
+            DisplayLanguage.French => "fr.finalfantasyxiv.com",
+            _ => "na.finalfantasyxiv.com",
+        };
         return $"https://{host}/lodestone/playguide/db/item/?q=" + Uri.EscapeDataString(itemName);
     }
 }

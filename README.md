@@ -13,7 +13,7 @@ Author: `Roxyz0501`
 - Posts the target character name, appearance item names, equipment slots, and Eorzea Database search links.
 - Lets you drag the real on-screen button to configure its position.
 - Provides explicit actions to test the Webhook and apply the bundled icon to it.
-- Supports English and Japanese throughout the settings UI, notifications, errors, tooltips, support tab, and Discord post labels.
+- Supports Japanese, English, German, French, Korean, Simplified Chinese, and Traditional Chinese throughout plugin-owned UI and messages.
 - Includes an optional Ko-fi support tab for Roxyz0501.
 
 ## Requirements and dependencies
@@ -53,7 +53,7 @@ Nothing is sent automatically. Posting occurs only after the user explicitly pre
 
 ## Settings
 
-- `Display language`: Choose `English` or `日本語`. On the first launch only, Japanese is selected for a Japanese game client; all other or undetectable languages select English. The saved selection is never overwritten by later client-language detection.
+- `Display language`: Choose `日本語`, `English`, `Deutsch`, `Français`, `한국어`, `简体中文`, or `繁體中文`. With no valid saved value, the plugin checks the game language first, then Dalamud's public UI language, then English. It saves that concrete choice once; there is no Auto value and startup never overwrites a saved choice. Dalamud API 15 exposes no separate public launcher-language API, so private launcher settings are not read.
 - `Discord Webhook URL`: Accepts Discord `https://discord.com/api/webhooks/...` and legacy `discordapp.com` Webhook URLs.
 - `Include equipment slot names`: Include slot labels in the posted equipment list.
 - `Test Webhook connection`: Explicitly post one fixed test message.
@@ -94,6 +94,7 @@ A Discord Webhook URL is a secret that grants posting access. Do not include it 
 - Database links are search links based on item names, not direct item-page links.
 - Discord message-size, upload-size, and rate limits apply.
 - Character names and screenshots may be personal or privacy-sensitive information. Verify the destination and audience before posting.
+- Item names come from game data available to the client. The plugin does not invent Korean or Chinese item translations. Database searches use Japanese, German, or French Lodestone hosts for those UI languages and the North American host otherwise.
 
 ## Troubleshooting
 
@@ -101,7 +102,7 @@ A Discord Webhook URL is a secret that grants posting access. Do not include it 
 - **The button says Loading:** Wait for inspect data to finish loading. Open the Coordinate view and try again.
 - **Position editing reports an error:** Keep the Examine window open until `Save position` is pressed.
 - **Discord posting fails:** Recheck the Webhook URL, test it from settings, and confirm that the Webhook still exists and can post to the channel.
-- **The wrong language is shown:** Open `/glamoursaver` and select `English` or `日本語`. Client-language detection runs only before a language has been saved.
+- **The wrong language is shown:** Open `/glamoursaver` and choose one of the seven language names. Detection runs only before a valid language has been saved.
 - **The screenshot includes unwanted content:** Move or disable overlays that cover the Examine window before posting.
 
 ## Uninstallation
@@ -118,7 +119,7 @@ dotnet restore .\GlamourSaver\GlamourSaver.csproj --locked-mode
 dotnet build .\GlamourSaver\GlamourSaver.csproj -c Release --no-restore
 ```
 
-The SDK is pinned by `global.json`, and NuGet dependencies are pinned by `packages.lock.json`. The versioned release archive is generated at `GlamourSaver/bin/Release/GlamourSaver/GlamourSaver-0.5.1.0.zip`.
+The SDK is pinned by `global.json`, and NuGet dependencies are pinned by `packages.lock.json`. The versioned release archive is generated at `GlamourSaver/bin/Release/GlamourSaver/GlamourSaver-0.6.0.0.zip`.
 
 ## Optional support
 
@@ -126,7 +127,7 @@ If you would like to support Roxyz0501's development, visit [Ko-fi: Roxyz0501](h
 
 ## AI usage
 
-OpenAI Codex and image generation tools assisted with the code, documentation, release preparation, and project icon. Human code review, rights review, in-game testing, and a real Discord posting test are required before publication.
+OpenAI Codex and image generation tools assisted with the code, documentation, release preparation, and project icon. Automated translation assisted the new non-English resource drafts. Human language review, code review, rights review, in-game testing, and a real Discord posting test remain recommended.
 
 ## License, third-party references, and attribution
 

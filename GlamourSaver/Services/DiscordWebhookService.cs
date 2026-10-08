@@ -45,9 +45,7 @@ public sealed class DiscordWebhookService(
                     image = new { url = "attachment://coordinate.png" },
                     footer = new
                     {
-                        text = localization.Text(
-                            $"Captured: {DateTime.Now:yyyy-MM-dd HH:mm:ss}",
-                            $"取得日時: {DateTime.Now:yyyy/MM/dd HH:mm:ss}"),
+                        text = localization.Format("Captured: {0}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")),
                     },
                 },
             },
@@ -153,9 +151,7 @@ public sealed class DiscordWebhookService(
     private void EnsureSuccess(HttpResponseMessage response)
     {
         if (!response.IsSuccessStatusCode)
-            throw new HttpRequestException(localization.Text(
-                $"Discord returned HTTP {(int)response.StatusCode}.",
-                $"DiscordがHTTP {(int)response.StatusCode}を返しました。"));
+            throw new HttpRequestException(localization.Format("Discord returned HTTP {0}.", (int)response.StatusCode));
     }
 
     public void Dispose() => http.Dispose();
