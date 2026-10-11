@@ -53,7 +53,7 @@ Nothing is sent automatically. Posting occurs only after the user explicitly pre
 
 ## Settings
 
-- `Display language`: Choose `日本語`, `English`, `Deutsch`, `Français`, `한국어`, `简体中文`, or `繁體中文`. With no valid saved value, the plugin checks the game language first, then Dalamud's public UI language, then English. It saves that concrete choice once; there is no Auto value and startup never overwrites a saved choice. Dalamud API 15 exposes no separate public launcher-language API, so private launcher settings are not read.
+- `Language settings` tab: Choose `日本語`, `English`, `Deutsch`, `Français`, `한국어`, `简体中文`, or `繁體中文`. With no valid saved value, the plugin checks the game language first, then Dalamud's public UI language, then English. It saves that concrete choice once; there is no Auto value and startup never overwrites a saved choice. Dalamud API 15 exposes no separate public launcher-language API, so private launcher settings are not read.
 - `Discord Webhook URL`: Accepts Discord `https://discord.com/api/webhooks/...` and legacy `discordapp.com` Webhook URLs.
 - `Include equipment slot names`: Include slot labels in the posted equipment list.
 - `Test Webhook connection`: Explicitly post one fixed test message.
@@ -119,7 +119,7 @@ dotnet restore .\GlamourSaver\GlamourSaver.csproj --locked-mode
 dotnet build .\GlamourSaver\GlamourSaver.csproj -c Release --no-restore
 ```
 
-The SDK is pinned by `global.json`, and NuGet dependencies are pinned by `packages.lock.json`. The versioned release archive is generated at `GlamourSaver/bin/Release/GlamourSaver/GlamourSaver-0.6.0.0.zip`.
+The SDK is pinned by `global.json`, and NuGet dependencies are pinned by `packages.lock.json`. The versioned release archive is generated at `GlamourSaver/bin/Release/GlamourSaver/GlamourSaver-1.0.0.0.zip`.
 
 ## Optional support
 

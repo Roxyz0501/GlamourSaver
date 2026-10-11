@@ -28,6 +28,23 @@ public sealed class LocalizationService(Configuration configuration)
     public DisplayLanguage ResolvedLanguage
         => IsValid(configuration.DisplayLanguage) ? configuration.DisplayLanguage!.Value : DisplayLanguage.English;
 
+    public string LanguageCode => ResolvedLanguage switch
+    {
+        DisplayLanguage.Japanese => "ja",
+        DisplayLanguage.German => "de",
+        DisplayLanguage.French => "fr",
+        DisplayLanguage.Korean => "ko",
+        DisplayLanguage.SimplifiedChinese => "zh-Hans",
+        DisplayLanguage.TraditionalChinese => "zh-Hant",
+        _ => "en",
+    };
+
+    public static bool TryFromCode(string code, out DisplayLanguage language)
+    {
+        language = FromLanguageCode(code) ?? DisplayLanguage.English;
+        return FromLanguageCode(code) is not null;
+    }
+
     public string Text(string englishKey, string legacyJapanese)
         => ResolvedLanguage == DisplayLanguage.Japanese && !string.IsNullOrWhiteSpace(legacyJapanese)
             ? legacyJapanese
@@ -132,6 +149,8 @@ public sealed class LocalizationService(Configuration configuration)
     {
         string[][] rows =
         [
+        R("Language settings###LanguageSettings", "言語設定###LanguageSettings", "Spracheinstellungen###LanguageSettings", "Paramètres de langue###LanguageSettings", "언어 설정###LanguageSettings", "语言设置###LanguageSettings", "語言設定###LanguageSettings"),
+        R("Support###Support", "支援###Support", "Unterstützung###Support", "Soutien###Support", "후원###Support", "支持###Support", "支援###Support"),
         R("★ Support###SupportTab", "★サポート###SupportTab", "★ Unterstützung###SupportTab", "★ Assistance###SupportTab", "★ 지원###SupportTab", "★ 支持###SupportTab", "★ 支持###SupportTab"),
         R("Appearance data is not ready. Open the Coordinate view and try again.", "外観データが準備されていません。座標ビューを開いて、再試行してください。", "Die Darstellungsdaten sind nicht bereit. Öffnen Sie die Koordinatenansicht und versuchen Sie es erneut.", "Les données d'apparence ne sont pas prêtes. Ouvrez la vue Coordonnées et réessayez.", "외모 데이터가 준비되지 않았습니다. 좌표 보기를 열고 다시 시도하세요.", "外观数据尚未准备好。打开坐标视图并重试。", "外觀數據尚未準備好。開啟座標視圖並重試。"),
         R("Applied the Glamour Saver icon to the Webhook.", "Glamour Saver アイコンを Webhook に適用しました。", "Das Glamour Saver-Symbol wurde auf den Webhook angewendet.", "Application de l'icône Glamour Saver au Webhook.", "Webhook에 Glamour Saver 아이콘을 적용했습니다.", "将 Glamour Saver 图标应用到 Webhook。", "將 Glamour Saver 圖示套用到 Webhook。"),

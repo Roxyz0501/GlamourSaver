@@ -4,7 +4,7 @@
   "Punchline": "Save an examined character's glamour to Discord with one explicit click.",
   "Description": "Adds a SendDiscord button beside the Examine window. Only when pressed, it posts a cropped image, target character name, appearance item names, and Eorzea Database search links to the configured Discord Webhook. Open settings with /glamoursaver. The UI supports seven languages.",
   "InternalName": "GlamourSaver",
-  "AssemblyVersion": "0.6.0.0",
+  "AssemblyVersion": "1.0.0.0",
   "RepoUrl": "https://github.com/Roxyz0501/GlamourSaver",
   "IconUrl": "https://raw.githubusercontent.com/Roxyz0501/GlamourSaver/main/GlamourSaver/images/icon.png",
   "ApplicableVersion": "any",

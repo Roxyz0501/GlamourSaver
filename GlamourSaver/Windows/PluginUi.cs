@@ -6,12 +6,12 @@ using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using GlamourSaver.Models;
 using GlamourSaver.Services;
+using Roxyz0501.Dalamud.CommonUi;
 
 namespace GlamourSaver.Windows;
 
 public sealed class PluginUi : IDisposable
 {
-    private const string SupportUrl = "https://ko-fi.com/roxyz0501";
     private readonly Configuration configuration;
     private readonly IGameGui gameGui;
     private readonly IChatGui chat;
@@ -30,7 +30,6 @@ public sealed class PluginUi : IDisposable
     private int draftButtonOffsetY;
     private int posting;
     private string status = string.Empty;
-    private string supportStatus = string.Empty;
     private volatile bool disposed;
 
     public PluginUi(
@@ -161,12 +160,15 @@ public sealed class PluginUi : IDisposable
                 ImGui.EndTabItem();
             }
 
-            ImGui.PushStyleColor(ImGuiCol.Tab, new Vector4(0.76f, 0.43f, 0.08f, 1f));
-            ImGui.PushStyleColor(ImGuiCol.TabHovered, new Vector4(0.95f, 0.60f, 0.15f, 1f));
-            ImGui.PushStyleColor(ImGuiCol.TabActive, new Vector4(1.00f, 0.72f, 0.24f, 1f));
-            ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.08f, 0.06f, 0.03f, 1f));
-            var supportTabOpen = ImGui.BeginTabItem(T("★ Support###SupportTab", "★ 支援###SupportTab"));
-            ImGui.PopStyleColor(4);
+            if (ImGui.BeginTabItem(T("Language settings###LanguageSettings", "言語設定###LanguageSettings")))
+            {
+                DrawLanguageSettings();
+                ImGui.EndTabItem();
+            }
+
+            StandardPluginTabs.PushSupportTabStyle();
+            var supportTabOpen = ImGui.BeginTabItem(T("Support###Support", "支援###Support"));
+            StandardPluginTabs.PopSupportTabStyle();
             if (supportTabOpen)
             {
                 DrawSupportTab();
@@ -180,20 +182,6 @@ public sealed class PluginUi : IDisposable
 
     private unsafe void DrawGeneralSettings()
     {
-        var selectedLanguage = Array.IndexOf(LocalizationService.SelectionOrder, localization.ResolvedLanguage);
-        ImGui.SetNextItemWidth(220);
-        if (ImGui.Combo(T("Display language", "表示言語"), ref selectedLanguage, string.Join('\0', LocalizationService.LanguageNames) + "\0"))
-        {
-            configuration.DisplayLanguage = LocalizationService.SelectionOrder[selectedLanguage];
-            status = string.Empty;
-            supportStatus = string.Empty;
-            save();
-        }
-        ImGui.TextDisabled(T(
-            "The initial language follows the game client once. Your selection is then kept until you change it.",
-            "初回のみゲームクライアント言語から選択し、その後はここで選んだ言語を維持します。"));
-        ImGui.Separator();
-
         ImGui.TextUnformatted(T("Discord Webhook URL", "Discord Webhook URL"));
         var webhook = configuration.DiscordWebhookUrl;
         ImGui.SetNextItemWidth(-1);
@@ -336,45 +324,26 @@ public sealed class PluginUi : IDisposable
 
     private void DrawSupportTab()
     {
-        ImGui.Spacing();
-        ImGui.TextColored(new Vector4(1.00f, 0.68f, 0.20f, 1f),
-            T("Support Roxyz0501's development", "Roxyz0501の開発を支援"));
-        ImGui.Spacing();
-        ImGui.TextWrapped(T(
-            "If you enjoy Glamour Saver, you can optionally support development through Ko-fi. All features remain available whether or not you contribute.",
-            "Glamour Saverを気に入っていただけた場合、Ko-fiから任意で開発を支援できます。支援の有無で機能が変わることはありません。"));
-        ImGui.Spacing();
-        ImGui.TextUnformatted(T("Recipient: Roxyz0501", "支援先: Roxyz0501"));
-        ImGui.TextDisabled(SupportUrl);
-        ImGui.Spacing();
-
-        ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.90f, 0.48f, 0.08f, 1f));
-        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, new Vector4(1.00f, 0.62f, 0.14f, 1f));
-        ImGui.PushStyleColor(ImGuiCol.ButtonActive, new Vector4(0.78f, 0.36f, 0.04f, 1f));
-        ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.08f, 0.05f, 0.02f, 1f));
-        var openSupport = ImGui.Button(
-            T("Support Roxyz0501 on Ko-fi", "Ko-fiでRoxyz0501を支援する"),
-            new Vector2(320, 52));
-        ImGui.PopStyleColor(4);
-
-        if (openSupport)
-            OpenSupportPage();
-        if (!string.IsNullOrWhiteSpace(supportStatus))
-            ImGui.TextWrapped(supportStatus);
+        StandardPluginTabs.DrawSupportContent(
+            T("Support Roxyz0501's development", "Roxyz0501の開発を支援"),
+            T("If you enjoy Glamour Saver, you can optionally support development through Ko-fi. All features remain available whether or not you contribute.",
+                "Glamour Saverを気に入っていただけた場合、Ko-fiから任意で開発を支援できます。支援の有無で機能が変わることはありません。"),
+            T("Recipient: Roxyz0501", "支援先: Roxyz0501"),
+            T("Support Roxyz0501 on Ko-fi", "Ko-fiでRoxyz0501を支援する"));
     }
 
-    private void OpenSupportPage()
+    private void DrawLanguageSettings()
     {
-        try
+        var changed = StandardPluginTabs.DrawLanguageSelector(
+            T("Display language", "表示言語"),
+            T("The initial language follows the game client once. Your selection is then kept until you change it.",
+                "初回のみゲームクライアント言語から選択し、その後はここで選んだ言語を維持します。"),
+            localization.LanguageCode);
+        if (changed is not null && LocalizationService.TryFromCode(changed, out var language))
         {
-            Process.Start(new ProcessStartInfo(SupportUrl) { UseShellExecute = true });
-            supportStatus = T(
-                "Opened Roxyz0501's Ko-fi page in your browser.",
-                "Ko-fiのRoxyz0501ページをブラウザで開きました。");
-        }
-        catch
-        {
-            supportStatus = localization.Format("The browser could not be opened. Open this URL manually: {0}", SupportUrl);
+            configuration.DisplayLanguage = language;
+            status = string.Empty;
+            save();
         }
     }
 

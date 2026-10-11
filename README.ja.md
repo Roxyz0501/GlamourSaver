@@ -53,7 +53,7 @@ Dalamud設定の「試験的機能」から下記のRoxyz0501共通カスタム�
 
 ## 設定
 
-- `表示言語`: `日本語`、`English`、`Deutsch`、`Français`、`한국어`、`简体中文`、`繁體中文` から選びます。有効な保存値がない初回だけ、ゲーム言語、Dalamudの公開UI言語、Englishの順で決定して具体値を保存します。Auto値はなく、以後の起動時検出で保存値を上書きしません。Dalamud API 15には独立したランチャー言語を取得する公開APIがないため、非公開設定は読みません。
+- `言語設定` タブ: `日本語`、`English`、`Deutsch`、`Français`、`한국어`、`简体中文`、`繁體中文` から選びます。有効な保存値がない初回だけ、ゲーム言語、Dalamudの公開UI言語、Englishの順で決定して具体値を保存します。Auto値はなく、以後の起動時検出で保存値を上書きしません。Dalamud API 15には独立したランチャー言語を取得する公開APIがないため、非公開設定は読みません。
 - `Discord Webhook URL`: Discordの `https://discord.com/api/webhooks/...` または旧 `discordapp.com` 形式を受け付けます。
 - `装備部位名も投稿する`: 投稿する装備一覧へ部位名を付けます。
 - `Webhook接続テスト`: 明示操作で固定のテストメッセージを1件投稿します。
@@ -119,7 +119,7 @@ dotnet restore .\GlamourSaver\GlamourSaver.csproj --locked-mode
 dotnet build .\GlamourSaver\GlamourSaver.csproj -c Release --no-restore
 ```
 
-SDKは `global.json`、NuGet依存は `packages.lock.json` で固定しています。公開用ZIPは `GlamourSaver/bin/Release/GlamourSaver/GlamourSaver-0.6.0.0.zip` に生成されます。
+SDKは `global.json`、NuGet依存は `packages.lock.json` で固定しています。公開用ZIPは `GlamourSaver/bin/Release/GlamourSaver/GlamourSaver-1.0.0.0.zip` に生成されます。
 
 ## 任意支援
 
