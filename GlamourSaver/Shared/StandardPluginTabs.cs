@@ -28,6 +28,41 @@ internal static class StandardPluginTabs
 
     public static void PopSupportTabStyle() => ImGui.PopStyleColor(4);
 
+    /// <summary>
+    /// Draws the three shared trailing tabs in their required order. Call this only after every
+    /// plugin-specific tab so the right edge is always Settings, Language settings, then Support.
+    /// </summary>
+    public static void DrawStandardTrailingTabs(
+        string settingsLabel,
+        string settingsStableId,
+        Action drawSettings,
+        string languageSettingsLabel,
+        Action drawLanguageSettings,
+        string supportLabel,
+        Action drawSupport)
+    {
+        if (ImGui.BeginTabItem($"{settingsLabel}###{settingsStableId}"))
+        {
+            drawSettings();
+            ImGui.EndTabItem();
+        }
+
+        if (ImGui.BeginTabItem($"{languageSettingsLabel}###LanguageSettings"))
+        {
+            drawLanguageSettings();
+            ImGui.EndTabItem();
+        }
+
+        PushSupportTabStyle();
+        bool supportOpen = ImGui.BeginTabItem($"{supportLabel}###Support");
+        PopSupportTabStyle();
+        if (supportOpen)
+        {
+            drawSupport();
+            ImGui.EndTabItem();
+        }
+    }
+
     public static string? DrawLanguageSelector(string label, string help, string currentCode)
     {
         (string Code, string SelfName) selected = Languages.FirstOrDefault(x => x.Code == currentCode);

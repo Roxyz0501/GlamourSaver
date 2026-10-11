@@ -149,7 +149,10 @@ public sealed class LocalizationService(Configuration configuration)
     {
         string[][] rows =
         [
+        R("Language settings", "言語設定", "Spracheinstellungen", "Paramètres de langue", "언어 설정", "语言设置", "語言設定"),
         R("Language settings###LanguageSettings", "言語設定###LanguageSettings", "Spracheinstellungen###LanguageSettings", "Paramètres de langue###LanguageSettings", "언어 설정###LanguageSettings", "语言设置###LanguageSettings", "語言設定###LanguageSettings"),
+        R("Settings", "設定", "Einstellungen", "Paramètres", "설정", "设置", "設定"),
+        R("Support", "支援", "Unterstützung", "Soutien", "후원", "支持", "支援"),
         R("Support###Support", "支援###Support", "Unterstützung###Support", "Soutien###Support", "후원###Support", "支持###Support", "支援###Support"),
         R("★ Support###SupportTab", "★サポート###SupportTab", "★ Unterstützung###SupportTab", "★ Assistance###SupportTab", "★ 지원###SupportTab", "★ 支持###SupportTab", "★ 支持###SupportTab"),
         R("Appearance data is not ready. Open the Coordinate view and try again.", "外観データが準備されていません。座標ビューを開いて、再試行してください。", "Die Darstellungsdaten sind nicht bereit. Öffnen Sie die Koordinatenansicht und versuchen Sie es erneut.", "Les données d'apparence ne sont pas prêtes. Ouvrez la vue Coordonnées et réessayez.", "외모 데이터가 준비되지 않았습니다. 좌표 보기를 열고 다시 시도하세요.", "外观数据尚未准备好。打开坐标视图并重试。", "外觀數據尚未準備好。開啟座標視圖並重試。"),

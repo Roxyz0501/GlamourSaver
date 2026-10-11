@@ -119,7 +119,7 @@ dotnet restore .\GlamourSaver\GlamourSaver.csproj --locked-mode
 dotnet build .\GlamourSaver\GlamourSaver.csproj -c Release --no-restore
 ```
 
-The SDK is pinned by `global.json`, and NuGet dependencies are pinned by `packages.lock.json`. The versioned release archive is generated at `GlamourSaver/bin/Release/GlamourSaver/GlamourSaver-1.0.0.0.zip`.
+The SDK is pinned by `global.json`, and NuGet dependencies are pinned by `packages.lock.json`. The versioned release archive is generated at `GlamourSaver/bin/Release/GlamourSaver/GlamourSaver-1.0.0.1.zip`.
 
 ## Optional support
 
