@@ -4,4 +4,4 @@ Discord operations now share one tracked, cancellable worker which is drained be
 
 Validation: Release build passed with zero warnings and errors. All 40 persistence/lifecycle assertions and localization, legacy-config, canonical-tab and PNG cancellation smoke tests passed. The package includes no user configuration or test data. Native game rendering, real Discord posting and real power-loss behavior remain unverified.
 
-SHA256: 17697A84599D97346127E615E88926E8333949DE364354F3E7B6D150BB9FC097
+SHA256: E11690F4C69C4BA1E44E4E71D3F927DF67A05445F77CC563D144A5210EB0E095
