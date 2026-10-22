@@ -10,7 +10,7 @@
     <AssemblyName>GlamourSaver</AssemblyName>
     <RootNamespace>GlamourSaver</RootNamespace>
     <Authors>Roxyz0501</Authors>
-    <Version>1.0.0.1</Version>
+    <Version>1.0.0.2</Version>
     <RepoUrl>https://github.com/Roxyz0501/GlamourSaver</RepoUrl>
     <IconUrl>https://raw.githubusercontent.com/Roxyz0501/GlamourSaver/main/GlamourSaver/images/icon.png</IconUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>

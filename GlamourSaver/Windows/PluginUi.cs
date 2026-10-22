@@ -20,8 +20,9 @@ public sealed class PluginUi : IDisposable
     private readonly ScreenCaptureService capture;
     private readonly DiscordWebhookService discord;
     private readonly LocalizationService localization;
-    private readonly Action save;
-    private readonly CancellationTokenSource lifetime = new();
+    private readonly ConfigurationStore<Configuration> store;
+    private readonly OwnedOperation operation = new();
+    private readonly System.Collections.Concurrent.ConcurrentQueue<Action> completions = new();
 
     private bool settingsOpen;
     private bool inspectWasVisible;
@@ -30,6 +31,7 @@ public sealed class PluginUi : IDisposable
     private int draftButtonOffsetY;
     private int posting;
     private string status = string.Empty;
+    private string? lastPersistenceNotice;
     private volatile bool disposed;
 
     public PluginUi(
@@ -41,7 +43,7 @@ public sealed class PluginUi : IDisposable
         ScreenCaptureService capture,
         DiscordWebhookService discord,
         LocalizationService localization,
-        Action save)
+        ConfigurationStore<Configuration> store)
     {
         this.configuration = configuration;
         this.gameGui = gameGui;
@@ -51,13 +53,21 @@ public sealed class PluginUi : IDisposable
         this.capture = capture;
         this.discord = discord;
         this.localization = localization;
-        this.save = save;
+        this.store = store;
     }
 
     public void OpenSettings() => settingsOpen = true;
 
     public void Draw()
     {
+        if (disposed) return;
+        if (store.Notice != lastPersistenceNotice)
+        {
+            lastPersistenceNotice = store.Notice;
+            if (lastPersistenceNotice is not null)
+                chat.Print($"[Glamour Saver] {localization.Text(lastPersistenceNotice)}");
+        }
+        while (completions.TryDequeue(out var completion)) completion();
         DrawCaptureButton();
         DrawSettings();
     }
@@ -97,7 +107,7 @@ public sealed class PluginUi : IDisposable
             return;
         }
 
-        var busy = Volatile.Read(ref posting) != 0;
+        var busy = Volatile.Read(ref posting) != 0 || operation.Busy;
         var dataReady = reader.IsReady;
         if (positionEditing)
         {
@@ -170,13 +180,20 @@ public sealed class PluginUi : IDisposable
 
     private unsafe void DrawGeneralSettings()
     {
+        ImGui.TextWrapped(localization.Text("Settings autosave every 60 seconds when changed, and on logout or shutdown. Backups may contain the Webhook URL."));
+        if (store.Notice is { } notice)
+        {
+            ImGui.TextWrapped(localization.Text(notice));
+            if (store.FailureKind is { } failure) ImGui.TextUnformatted(failure);
+            if (store.CanRetry && ImGui.Button(localization.Text("Retry saving"))) store.Retry();
+        }
         ImGui.TextUnformatted(T("Discord Webhook URL", "Discord Webhook URL"));
         var webhook = configuration.DiscordWebhookUrl;
         ImGui.SetNextItemWidth(-1);
         if (ImGui.InputText("##GlamourSaverWebhook", ref webhook, 2048, ImGuiInputTextFlags.Password))
-            configuration.DiscordWebhookUrl = webhook;
-        if (ImGui.IsItemDeactivatedAfterEdit())
-            save();
+        {
+            store.Change(c => c.DiscordWebhookUrl = webhook);
+        }
         ImGui.TextDisabled(T(
             "Only https://discord.com/api/webhooks/... URLs are accepted.",
             "https://discord.com/api/webhooks/... のURLだけを受け付けます。"));
@@ -189,9 +206,8 @@ public sealed class PluginUi : IDisposable
             ImGui.BeginDisabled();
         if (ImGui.Button(T("Delete saved Webhook URL", "保存済みWebhook URLを削除")))
         {
-            configuration.DiscordWebhookUrl = string.Empty;
-            save();
-            status = T("The saved Webhook URL was deleted.", "保存済みWebhook URLを削除しました。");
+            store.Change(c => c.DiscordWebhookUrl = string.Empty);
+            status = localization.Text("Webhook URL cleared. Autosave is pending; older backups may still contain it.");
         }
         if (webhookMissing)
             ImGui.EndDisabled();
@@ -199,15 +215,16 @@ public sealed class PluginUi : IDisposable
         var includeSlots = configuration.IncludeSlotNames;
         if (ImGui.Checkbox(T("Include equipment slot names", "装備部位名も投稿する"), ref includeSlots))
         {
-            configuration.IncludeSlotNames = includeSlots;
-            save();
+            store.Change(c => c.IncludeSlotNames = includeSlots);
         }
 
+        ImGui.BeginDisabled(operation.Busy);
         if (ImGui.Button(T("Test Webhook connection", "Webhook接続テスト")))
-            _ = TestWebhookAsync();
+            operation.Start(TestWebhookAsync);
         ImGui.SameLine();
         if (ImGui.Button(T("Apply bundled icon to Webhook", "作成したアイコンをWebhookへ適用")))
-            _ = ApplyWebhookIconAsync();
+            operation.Start(ApplyWebhookIconAsync);
+        ImGui.EndDisabled();
         ImGui.SameLine();
         ImGui.TextWrapped(status);
 
@@ -265,11 +282,11 @@ public sealed class PluginUi : IDisposable
             }
             else
             {
-                configuration.ButtonOffsetX = draftButtonOffsetX;
-                configuration.ButtonOffsetY = draftButtonOffsetY;
-                save();
+                store.Change(c => { c.ButtonOffsetX = draftButtonOffsetX; c.ButtonOffsetY = draftButtonOffsetY; });
+                store.Flush(); // Explicit Save position confirmation keeps its durability boundary.
                 positionEditing = false;
-                status = T("The SendDiscord button position was saved.", "SendDiscordボタンの位置を保存しました。");
+                status = store.Notice is { } saveNotice ? localization.Text(saveNotice)
+                    : T("The SendDiscord button position was saved.", "SendDiscordボタンの位置を保存しました。");
             }
         }
         if (savePositionDisabled)
@@ -287,9 +304,7 @@ public sealed class PluginUi : IDisposable
             }
             else
             {
-                configuration.ButtonOffsetX = 0;
-                configuration.ButtonOffsetY = 0;
-                save();
+                store.Change(c => { c.ButtonOffsetX = 0; c.ButtonOffsetY = 0; });
                 status = T(
                     "The SendDiscord button was reset to its default position.",
                     "SendDiscordボタンの位置をデフォルトへ戻しました。");
@@ -329,14 +344,14 @@ public sealed class PluginUi : IDisposable
             localization.LanguageCode);
         if (changed is not null && LocalizationService.TryFromCode(changed, out var language))
         {
-            configuration.DisplayLanguage = language;
+            store.Change(c => c.DisplayLanguage = language);
             status = string.Empty;
-            save();
         }
     }
 
     private void BeginPost(FFXIVClientStructs.FFXIV.Common.Math.Bounds bounds)
     {
+        if (disposed || operation.Busy) return;
         if (Interlocked.CompareExchange(ref posting, 1, 0) != 0)
             return;
 
@@ -356,9 +371,10 @@ public sealed class PluginUi : IDisposable
                     "見た目装備がまだ読み込まれていません。コーディネート画面を開いてから再度お試しください。"));
 
             var region = ToScreenRegion(bounds, configuration.CapturePadding);
-            var png = capture.CapturePng(region);
+            var pixels = capture.CapturePixels(region);
             status = T("Sending to Discord...", "Discordへ送信中...");
-            _ = PostAsync(snapshot, png, lifetime.Token);
+            if (!operation.Start(token => PostAsync(snapshot, pixels, region, token)))
+                Interlocked.Exchange(ref posting, 0);
         }
         catch (Exception ex)
         {
@@ -369,13 +385,17 @@ public sealed class PluginUi : IDisposable
         }
     }
 
-    private async Task PostAsync(CoordinateSnapshot snapshot, byte[] png, CancellationToken cancellationToken)
+    private async Task PostAsync(CoordinateSnapshot snapshot, byte[] pixels, ScreenRegion region, CancellationToken cancellationToken)
     {
         try
         {
+            var png = await ScreenCaptureService.EncodePngAsync(pixels, region, cancellationToken).ConfigureAwait(false);
             await discord.SendAsync(snapshot, png, cancellationToken).ConfigureAwait(false);
-            status = localization.Format("Posted {0}'s glamour.", snapshot.CharacterName);
-            chat.Print($"[Glamour Saver] {status}");
+            completions.Enqueue(() =>
+            {
+                status = localization.Format("Posted {0}'s glamour.", snapshot.CharacterName);
+                chat.Print($"[Glamour Saver] {status}");
+            });
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
@@ -387,9 +407,12 @@ public sealed class PluginUi : IDisposable
         }
         catch (Exception ex)
         {
-            status = localization.Format("Post failed: {0}", ex.Message);
-            chat.PrintError($"[Glamour Saver] {status}");
-            log.Error(ex, "Discordへの投稿に失敗しました");
+            completions.Enqueue(() =>
+            {
+                status = localization.Format("Post failed: {0}", ex.Message);
+                chat.PrintError($"[Glamour Saver] {status}");
+                log.Error("Discord post failed.");
+            });
         }
         finally
         {
@@ -397,12 +420,12 @@ public sealed class PluginUi : IDisposable
         }
     }
 
-    private async Task TestWebhookAsync()
+    private async Task TestWebhookAsync(CancellationToken cancellationToken)
     {
         try
         {
             status = T("Testing connection...", "接続テスト中...");
-            await discord.TestAsync(lifetime.Token).ConfigureAwait(false);
+            await discord.TestAsync(cancellationToken).ConfigureAwait(false);
             status = T("Connection test succeeded.", "接続テストに成功しました。");
         }
         catch (OperationCanceledException) when (disposed)
@@ -418,12 +441,12 @@ public sealed class PluginUi : IDisposable
         }
     }
 
-    private async Task ApplyWebhookIconAsync()
+    private async Task ApplyWebhookIconAsync(CancellationToken cancellationToken)
     {
         try
         {
             status = T("Applying the Webhook icon...", "Webhookアイコンを適用中...");
-            await discord.ApplyIconAsync(lifetime.Token).ConfigureAwait(false);
+            await discord.ApplyIconAsync(cancellationToken).ConfigureAwait(false);
             status = T(
                 "Applied the Glamour Saver icon to the Webhook.",
                 "WebhookアイコンをGlamour Saverへ適用しました。");
@@ -504,9 +527,12 @@ public sealed class PluginUi : IDisposable
         if (disposed)
             return;
         disposed = true;
-        lifetime.Cancel();
-        discord.Dispose();
-        lifetime.Dispose();
+        try { operation.Dispose(); }
+        finally
+        {
+            completions.Clear();
+            discord.Dispose();
+        }
     }
 
     private static ScreenRegion ToScreenRegion(FFXIVClientStructs.FFXIV.Common.Math.Bounds bounds, int padding)

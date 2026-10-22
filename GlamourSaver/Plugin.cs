@@ -12,6 +12,13 @@ public sealed class Plugin : IDalamudPlugin
     private readonly IDalamudPluginInterface pluginInterface;
     private readonly ICommandManager commandManager;
     private readonly PluginUi ui;
+    private readonly ConfigurationStore<Configuration> store;
+    private readonly IFramework framework;
+    private readonly IClientState clientState;
+    private readonly IPluginLog log;
+    private bool disposed;
+    private readonly CancellationTokenRegistration shutdownRegistration;
+    private readonly CancellationTokenRegistration unloadRegistration;
 
     public Plugin(
         IDalamudPluginInterface pluginInterface,
@@ -20,12 +27,19 @@ public sealed class Plugin : IDalamudPlugin
         IClientState clientState,
         IGameGui gameGui,
         IChatGui chatGui,
-        IPluginLog log)
+        IPluginLog log,
+        IFramework framework,
+        IGameLifecycle lifecycle)
     {
         this.pluginInterface = pluginInterface;
         this.commandManager = commandManager;
+        this.framework = framework;
+        this.clientState = clientState;
+        this.log = log;
 
-        var configuration = pluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
+        store = new ConfigurationStore<Configuration>(pluginInterface.ConfigFile.FullName,
+            validate: config => config.Version is >= 0 and <= 4 && config.DiscordWebhookUrl is not null);
+        var configuration = store.Value;
         var configurationChanged = configuration.Migrate();
         LocalizationService.ValidateOrThrow();
         var initialLanguage = LocalizationService.ResolveInitial(configuration.DisplayLanguage, clientState.ClientLanguage, pluginInterface.UiLanguage);
@@ -35,13 +49,13 @@ public sealed class Plugin : IDalamudPlugin
             configurationChanged = true;
         }
         if (configurationChanged)
-            pluginInterface.SavePluginConfig(configuration);
+            store.MarkChanged();
         var localization = new LocalizationService(configuration);
         var reader = new CoordinateReader(dataManager, log, localization);
         var capture = new ScreenCaptureService(localization);
         var discord = new DiscordWebhookService(configuration, localization);
         ui = new PluginUi(configuration, gameGui, chatGui, log, reader, capture, discord, localization,
-            () => pluginInterface.SavePluginConfig(configuration));
+            store);
 
         commandManager.AddHandler(Command, new CommandInfo((_, _) => ui.OpenSettings())
         {
@@ -52,14 +66,33 @@ public sealed class Plugin : IDalamudPlugin
         pluginInterface.UiBuilder.Draw += ui.Draw;
         pluginInterface.UiBuilder.OpenConfigUi += ui.OpenSettings;
         pluginInterface.UiBuilder.OpenMainUi += ui.OpenSettings;
+        framework.Update += OnUpdate;
+        clientState.Logout += OnLogout;
+        shutdownRegistration = lifecycle.GameShuttingDownToken.Register(store.Flush);
+        unloadRegistration = lifecycle.DalamudUnloadingToken.Register(store.Flush);
     }
+
+    private void OnUpdate(IFramework _) => store.Tick();
+    private void OnLogout(int type, int code) => store.Flush();
 
     public void Dispose()
     {
+        if (disposed) return;
+        disposed = true;
+        shutdownRegistration.Dispose();
+        unloadRegistration.Dispose();
+        framework.Update -= OnUpdate;
+        clientState.Logout -= OnLogout;
         pluginInterface.UiBuilder.Draw -= ui.Draw;
         pluginInterface.UiBuilder.OpenConfigUi -= ui.OpenSettings;
         pluginInterface.UiBuilder.OpenMainUi -= ui.OpenSettings;
         commandManager.RemoveHandler(Command);
-        ui.Dispose();
+        try { ui.Dispose(); }
+        finally
+        {
+            store.Dispose();
+            if (store.CanRetry || store.Stopped)
+                log.Warning("Glamour Saver settings could not be saved at shutdown. Check disk access and restore a valid configuration if necessary.");
+        }
     }
 }

@@ -81,7 +81,10 @@ Dalamud設定の「試験的機能」から下記のRoxyz0501共通カスタム�
 - 支援タブは明示クリック時だけ `https://ko-fi.com/roxyz0501` を既定ブラウザで開きます。
 - テレメトリ、アクセス解析、広告、自動投稿、バックグラウンド収集はありません。
 - Webhook URLはDalamudが管理する `GlamourSaver` の設定JSONへ平文で保存されます。UIでは伏せ字表示し、ログ、例外、Discord本文、Release ZIPへ出力しません。
-- 「保存済みWebhook URLを削除」で値を消せます。完全に削除する場合はプラグイン停止後にDalamudの設定JSONも削除してください。
+- 設定は変更時のみ60秒ごとに保存し、ログアウト・ゲーム正常終了・Dalamud終了・プラグイン無効化時にも未保存分を保存します。保存済みの値へ戻した場合は書き込みません。「位置を保存」は明示的な確定操作として即時保存します。
+- 既存の `GlamourSaver.json` をプラグインが直接、原子的に置き換え、正常な前の設定を `GlamourSaver.json.backups` に3世代残します。主ファイル破損時は正常なバックアップから復元し、破損した主ファイルを `GlamourSaver.json.corrupt-*` に保持します。復元はチャットと設定画面で通知します。正常なコピーを読み込めない場合は自動保存を止め、正常ファイルの復元と再読み込みを待ちます。
+- 保存が連続3回失敗すると自動再試行を停止します。空き容量・アクセス権を直して「保存を再試行」を押してください。クラッシュ・強制終了では終了処理を保証できず、最大約60秒の未保存編集が失われる場合があります。
+- 「保存済みWebhook URLを削除」は現在値を消し、同じ自動保存周期で反映します。古いバックアップや破損退避にはURLが残る場合があります。完全削除はプラグイン停止後に設定JSON、対応する `.backups` ディレクトリ、`.corrupt-*`／`.tmp-*` を削除し、必要ならDiscord側のWebhookも失効させてください。これらのファイルを共有しないでください。
 - キャラクター名、装備、画像はローカルファイルへ保存せず、明示送信時にメモリ上で生成します。
 
 Webhook URLは投稿権限を持つ秘密情報です。Issue、チャット、スクリーンショット、ログへ掲載しないでください。漏えい時はDiscord側でWebhookを削除・再作成してください。
@@ -108,7 +111,7 @@ Webhook URLは投稿権限を持つ秘密情報です。Issue、チャット、�
 ## アンインストール
 
 1. Dalamudのプラグインインストーラーで `Glamour Saver` を無効化・削除します。
-2. 保存設定も消す場合は、Dalamudの設定ディレクトリにある `GlamourSaver` の設定JSONを削除します。
+2. 保存設定や古いWebhook URLも消す場合は、Dalamud設定ディレクトリの `GlamourSaver.json`、対応する `.backups` ディレクトリと `.corrupt-*`／`.tmp-*` を削除します。
 3. Webhookが不要ならDiscordのチャンネル設定から削除します。
 4. 共通カスタムリポジトリ内の他プラグインも使わない場合だけ、そのリポジトリURLをDalamud設定から削除します。
 
@@ -119,7 +122,7 @@ dotnet restore .\GlamourSaver\GlamourSaver.csproj --locked-mode
 dotnet build .\GlamourSaver\GlamourSaver.csproj -c Release --no-restore
 ```
 
-SDKは `global.json`、NuGet依存は `packages.lock.json` で固定しています。公開用ZIPは `GlamourSaver/bin/Release/GlamourSaver/GlamourSaver-1.0.0.1.zip` に生成されます。
+SDKは `global.json`、NuGet依存は `packages.lock.json` で固定しています。ZIPは `GlamourSaver/bin/Release/GlamourSaver/GlamourSaver-1.0.0.2.zip` に生成されます。
 
 ## 任意支援
 

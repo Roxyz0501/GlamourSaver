@@ -12,7 +12,7 @@ public sealed class ScreenCaptureService(LocalizationService localization)
     private const int Srccopy = 0x00CC0020;
     private const int DibRgbColors = 0;
 
-    public byte[] CapturePng(ScreenRegion region)
+    public byte[] CapturePixels(ScreenRegion region)
     {
         if (!region.IsValid)
             throw new ArgumentOutOfRangeException(nameof(region));
@@ -46,10 +46,7 @@ public sealed class ScreenCaptureService(LocalizationService localization)
                     Marshal.GetLastWin32Error(),
                     localization.Text("Failed to read the captured image pixels.", "画像ピクセルを読み出せませんでした。"));
 
-            using var image = Image.LoadPixelData<Bgra32>(pixels, region.Width, region.Height);
-            using var output = new MemoryStream();
-            image.Save(output, new PngEncoder { CompressionLevel = PngCompressionLevel.Level6 });
-            return output.ToArray();
+            return pixels;
         }
         finally
         {
@@ -58,6 +55,15 @@ public sealed class ScreenCaptureService(LocalizationService localization)
             DeleteDC(memory);
             ReleaseDC(IntPtr.Zero, screen);
         }
+    }
+
+    public static async Task<byte[]> EncodePngAsync(byte[] pixels, ScreenRegion region, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        using var image = Image.LoadPixelData<Bgra32>(pixels, region.Width, region.Height);
+        using var output = new MemoryStream();
+        await image.SaveAsync(output, new PngEncoder { CompressionLevel = PngCompressionLevel.Level6 }, cancellationToken).ConfigureAwait(false);
+        return output.ToArray();
     }
 
     [StructLayout(LayoutKind.Sequential)]

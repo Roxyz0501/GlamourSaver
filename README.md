@@ -81,7 +81,10 @@ The connection test sends only a fixed test message. Applying the Webhook icon s
 - The support tab opens `https://ko-fi.com/roxyz0501` only after an explicit click.
 - There is no telemetry, analytics, advertising, automatic posting, or background data collection.
 - The Webhook URL is stored as plain text in the Dalamud-managed `GlamourSaver` configuration JSON. It is masked in the UI and is not included in logs, exception messages, Discord message content, or the Release ZIP.
-- Use `Delete saved Webhook URL` to clear the value. For full removal, disable the plugin and delete its Dalamud configuration JSON.
+- Changed settings are saved every 60 seconds and flushed on logout, normal game shutdown, Dalamud unload, and plugin disposal. Returning a setting to its saved value does not write a file. `Save position` explicitly commits the position immediately.
+- The plugin writes the existing `GlamourSaver.json` path directly, atomically replacing it and retaining three valid previous versions in `GlamourSaver.json.backups`. A damaged main file is preserved as `GlamourSaver.json.corrupt-*` when a valid backup is restored. Recovery is reported in chat/settings. If no valid copy can be read, automatic saving is blocked until you restore a valid file and reload the plugin.
+- Three consecutive save failures stop automatic retries. Fix disk space/access and press `Retry saving`. A crash or forced termination can lose up to approximately 60 seconds of unsaved edits; shutdown callbacks are not guaranteed on a crash.
+- Use `Delete saved Webhook URL` to clear the current value; the change follows the same autosave schedule. Older backups and damaged copies may still contain the URL. For full removal, disable the plugin, delete its configuration JSON, the matching `.backups` directory and `.corrupt-*`/`.tmp-*` files, and revoke the Webhook in Discord if needed. Do not share those files.
 - Character names, equipment, and screenshots are not written to local files; they are generated in memory for the explicit Discord request.
 
 A Discord Webhook URL is a secret that grants posting access. Do not include it in issues, chat, screenshots, or logs. Delete and recreate the Webhook in Discord if it is exposed.
@@ -108,7 +111,7 @@ A Discord Webhook URL is a secret that grants posting access. Do not include it 
 ## Uninstallation
 
 1. Disable and remove `Glamour Saver` in the Dalamud plugin installer.
-2. Delete the `GlamourSaver` configuration JSON from Dalamud's configuration directory if you also want to remove saved settings.
+2. Delete `GlamourSaver.json`, its `.backups` directory and any matching `.corrupt-*`/`.tmp-*` files from Dalamud's configuration directory if you also want to remove saved settings and old Webhook URLs.
 3. Delete the Discord Webhook from the channel settings if it is no longer needed.
 4. Remove the shared custom repository URL from Dalamud only if you no longer use any plugins from that repository.
 
@@ -119,7 +122,7 @@ dotnet restore .\GlamourSaver\GlamourSaver.csproj --locked-mode
 dotnet build .\GlamourSaver\GlamourSaver.csproj -c Release --no-restore
 ```
 
-The SDK is pinned by `global.json`, and NuGet dependencies are pinned by `packages.lock.json`. The versioned release archive is generated at `GlamourSaver/bin/Release/GlamourSaver/GlamourSaver-1.0.0.1.zip`.
+The SDK is pinned by `global.json`, and NuGet dependencies are pinned by `packages.lock.json`. The versioned archive is generated at `GlamourSaver/bin/Release/GlamourSaver/GlamourSaver-1.0.0.2.zip`.
 
 ## Optional support
 

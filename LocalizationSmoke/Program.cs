@@ -29,4 +29,33 @@ var helperLanguage = canonical.IndexOf("languageSettingsLabel", helperSettings +
 var helperSupport = canonical.IndexOf("supportLabel", helperLanguage + 1, StringComparison.Ordinal);
 if (!(helperSettings >= 0 && helperSettings < helperLanguage && helperLanguage < helperSupport))
     throw new Exception("Canonical trailing tab order is invalid.");
-Console.WriteLine("Localization, migration, canonical source, and tab-order smoke tests passed.");
+var fixture = Path.GetFullPath(Path.Combine("LocalizationSmoke", ".scratch-" + Guid.NewGuid().ToString("N")));
+Directory.CreateDirectory(fixture);
+try
+{
+    var path = Path.Combine(fixture, "config.json");
+    File.WriteAllText(path, """{"$type":"GlamourSaver.Configuration, GlamourSaver","Version":3,"DisplayLanguage":2,"DiscordWebhookUrl":"synthetic-not-a-webhook","IncludeSlotNames":false,"ButtonOffsetX":51,"ButtonOffsetY":-12}""");
+    using (var store = new ConfigurationStore<Configuration>(path))
+    {
+        var c = store.Value;
+        if (c.DisplayLanguage != DisplayLanguage.Japanese || c.ButtonOffsetX != 51 || c.ButtonOffsetY != -12 || c.IncludeSlotNames || c.DiscordWebhookUrl != "synthetic-not-a-webhook") throw new Exception("Legacy config fidelity");
+        if (c.Migrate()) store.MarkChanged();
+        store.Dispose();
+        if (store.Saves != 1) throw new Exception("Migration flush");
+    }
+    using var reopened = new ConfigurationStore<Configuration>(path);
+    if (reopened.Value.Version != 4 || reopened.Value.DisplayLanguage != DisplayLanguage.Japanese) throw new Exception("Saved migration reload");
+    reopened.Flush();
+    if (reopened.Saves != 0) throw new Exception("No write on valid restart");
+}
+finally { Directory.Delete(fixture, true); }
+if (!File.ReadAllBytes("../templates/Dalamud/StandardPluginTabs.cs").SequenceEqual(File.ReadAllBytes("GlamourSaver/Shared/StandardPluginTabs.cs"))) throw new Exception("Canonical bytes differ");
+var png = await ScreenCaptureService.EncodePngAsync(new byte[16], new GlamourSaver.Models.ScreenRegion(0, 0, 2, 2), CancellationToken.None);
+if (!png.Take(8).SequenceEqual(new byte[] { 137, 80, 78, 71, 13, 10, 26, 10 })) throw new Exception("PNG encode");
+try
+{
+    await ScreenCaptureService.EncodePngAsync(new byte[16], new GlamourSaver.Models.ScreenRegion(0, 0, 2, 2), new CancellationToken(true));
+    throw new Exception("PNG cancellation ignored");
+}
+catch (OperationCanceledException) { }
+Console.WriteLine("Localization, migration, canonical source bytes, tab-order and legacy persistence smoke tests passed.");
