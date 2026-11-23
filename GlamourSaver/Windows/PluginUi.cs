@@ -171,7 +171,9 @@ public sealed class PluginUi : IDisposable
                 T("Language settings", "言語設定"),
                 DrawLanguageSettings,
                 T("Support", "支援"),
-                DrawSupportTab);
+                DrawSupportTab,
+                infoLabel: StandardPluginInfo.Title(localization.LanguageCode),
+                drawInfo: null); // No required or feature-specific external plugin dependencies.
 
             ImGui.EndTabBar();
         }

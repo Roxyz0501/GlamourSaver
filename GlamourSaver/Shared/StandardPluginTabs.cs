@@ -39,12 +39,19 @@ internal static class StandardPluginTabs
         string languageSettingsLabel,
         Action drawLanguageSettings,
         string supportLabel,
-        Action drawSupport)
+        Action drawSupport,
+        string? infoLabel = null,
+        Action? drawInfo = null)
     {
         if (ImGui.BeginTabItem($"{settingsLabel}###{settingsStableId}"))
         {
             drawSettings();
             ImGui.EndTabItem();
+        }
+
+        if (drawInfo != null && ImGui.BeginTabItem($"{infoLabel}###DependencyInfo"))
+        {
+            try { drawInfo(); } finally { ImGui.EndTabItem(); }
         }
 
         if (ImGui.BeginTabItem($"{languageSettingsLabel}###LanguageSettings"))
